@@ -1,0 +1,10 @@
+.phpunit.result.cache
+_resources
+composer.lock
+gh-payload.json
+node_modules
+package-lock.json
+vendor
+doctum_build
+doctum_cache
+

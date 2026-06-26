@@ -1,0 +1,28 @@
+{
+  "name": "werkbot/werkbot-ajax-filter-forms",
+  "description": "A SilverStripe module that provides boilerplate for ajax powered filter forms.",
+  "type": "silverstripe-vendormodule",
+  "license": "MIT",
+  "homepage": "https://github.com/werkbot/silverstripe-module-ajax-filter-forms",
+  "require": {
+  },
+  "require-dev": {
+    "code-lts/doctum": "^5.5",
+    "phpunit/phpunit": "^9.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Werkbot\\AjaxForms\\": "src/",
+      "Werkbot\\AjaxForms\\Tests\\": "tests/php/"
+    }
+  },
+  "extra": {
+    "resources-dir": "_resources"
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "silverstripe/vendor-plugin": true
+    }
+  }
+}
