@@ -10,7 +10,7 @@ resolve: {
 
 ## Usage
 Assign AjaxForm elements and initialize the form.
-See the [FormConfig](client/src/form-config.ts) interface for more information on each of the properties.
+See the [FormConfig](/client/src/form-config.ts) interface for more information on each of the properties.
 
 ## Example usage:
 ```ts
