@@ -21,6 +21,6 @@ BlogPageController:
 ```
 
 The PageController will then need to implement each of the methods defined in the `UsesAjaxForm` interface.
-See the [UsesAjaxForm](src/UsesAjaxForm.php) interface for more information on each of the methods.
+See the [UsesAjaxForm](/src/UsesAjaxForm.php) interface for more information on each of the methods.
 
 
