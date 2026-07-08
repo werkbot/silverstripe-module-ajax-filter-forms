@@ -5,7 +5,7 @@ This can be aliased in a vite.config.js.
 ```js
 resolve: {
     alias: {
-        'werkbot-ajax-forms': path.resolve(__dirname, './vendor/werkbot/werkbot-ajax-forms/client/src'),
+        'werkbot-ajax-forms': path.resolve(__dirname, './vendor/werkbot/werkbot-ajax-filter-forms/client/src'),
 ```
 
 ## Usage
