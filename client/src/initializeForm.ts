@@ -4,7 +4,7 @@ import { initializeHistoryChange } from './components/history-change';
 import { initializeLoadMore } from './components/load-more';
 import { initializeSortControl } from './components/sort-by';
 import { submitForm } from './components/submit-form';
-import { initializeViewType } from './components/view-type';
+import { initializeDropdownSelections } from './components/dropdown-selections';
 import { initializeCheckboxes } from './components/checkboxes';
 
 import { FormConfig } from './form-config';
@@ -21,6 +21,7 @@ export function initializeForm(config: FormConfig) {
     SortByField,
     StartHiddenField,
     ViewTypeField,
+    DropdownSelectFields,
   } = config;
 
   if (FilterForm) {
@@ -44,6 +45,10 @@ export function initializeForm(config: FormConfig) {
 
   if (ViewTypeField) {
     initializeViewType(config);
+  }
+
+  if (DropdownSelectFields) {
+    initializeDropdownSelections(config);
   }
 
   if (FilterDropdownToggleButtons) {

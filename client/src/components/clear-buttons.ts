@@ -66,6 +66,7 @@ function clearAllButtonEventListener() {
     FilterDropdownToggleButtons,
     FilterForm,
     TextSearchField,
+    DropdownSelectFields,
   } = formConfig;
 
   if (CheckboxContainers) CheckboxContainers.forEach((checkboxContainer) => {
@@ -87,6 +88,12 @@ function clearAllButtonEventListener() {
   if (TextSearchField) {
     TextSearchField.value = '';
     TextSearchField.dispatchEvent(new Event('blur'));
+  }
+
+  if (DropdownSelectFields) {
+    DropdownSelectFields.forEach((dropdown) => {
+      dropdown.selectedIndex = 0;
+    });
   }
 
   if (FilterDropdownToggleButtons && FilterDropdownToggleButtons.length && FilterForm) {
@@ -113,7 +120,7 @@ function renderClearButtonsByFormFilters() {
     TextSearchField,
   } = formConfig;
 
-  if (!FilterForm) return;
+  if (!FilterForm || !DynamicClearFilterButtonsContainer) return;
 
   // Get all filters set in the form
   const existingFilters = Array.from(FilterForm.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));

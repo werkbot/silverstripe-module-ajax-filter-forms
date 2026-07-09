@@ -82,5 +82,10 @@ export interface FormConfig {
    * A "View Type" element, that when clicked toggles the view type of the results (e.g. grid or list).
    */
   ViewTypeField?: HTMLElement;
+
+  /**
+   * A list of select elements that allow users to filter the results by dropdown options.
+   */
+  DropdownSelectFields?: NodeListOf<HTMLSelectElement>;
 }
 
