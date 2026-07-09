@@ -95,7 +95,7 @@ class AjaxFormsExtension extends DataExtension
     return $activeFilters;
   }
 
-  public function getAjaxResponse(): HTTPResponse
+  public function getAjaxResultsData(): array
   {
     $request = $this->owner->request;
     $start = $this->owner->request->getVar('Start');
@@ -119,18 +119,31 @@ class AjaxFormsExtension extends DataExtension
       $canLoadMore = $results->count() % $loadMoreCount === 0;
     }
 
-    $responseData = [
-      'FilterString' => $filtersMessage,
-      'Start' => $newStart,
-      'CanLoadMore' => $canLoadMore,
-      'ResultsHTML' => ArrayData::create([
-        'AjaxSearchResults' => $results,
-      ])->renderWith($this->owner->getResultsTemplate())->RAW(),
+    $resultsHTMLData = [
+      'AjaxSearchResults' => $results,
+      'AjaxSearchResultsEncoded' => json_encode($results->toArray()),
     ];
 
-    $this->owner->extend('updateAjaxResponseData', $responseData);
+    $this->owner->extend('updateAjaxResultsHTMLData', $resultsHTMLData);
 
-    $response = HTTPResponse::create(json_encode($responseData))
+    $resultsData = array_merge(
+      $resultsHTMLData,
+      [
+        'FilterString' => $filtersMessage,
+        'Start' => $newStart,
+        'CanLoadMore' => $canLoadMore,
+        'ResultsHTML' => ArrayData::create($resultsHTMLData)->renderWith($this->owner->getResultsTemplate())->RAW(),
+      ]
+    );
+
+    $this->owner->extend('updateAjaxResultsData', $resultsData);
+
+    return $resultsData;
+  }
+
+  public function getAjaxResponse(): HTTPResponse
+  {
+    $response = HTTPResponse::create(json_encode($this->owner->getAjaxResultsData()))
       ->addHeader('Content-Type', 'application/json');
 
     $this->owner->extend('updateAjaxResponse', $response);
