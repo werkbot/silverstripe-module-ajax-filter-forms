@@ -65,7 +65,7 @@ function clearAllButtonEventListener() {
     ClearAllFiltersButtons,
     FilterDropdownToggleButtons,
     FilterForm,
-    TextSearchField,
+    TextSearchFields,
     DropdownSelectFields,
   } = formConfig;
 
@@ -85,9 +85,11 @@ function clearAllButtonEventListener() {
     clearButton.style.display = 'none';
   });
 
-  if (TextSearchField) {
-    TextSearchField.value = '';
-    TextSearchField.dispatchEvent(new Event('blur'));
+  if (TextSearchFields) {
+    TextSearchFields.forEach((textSearchField) => {
+      textSearchField.value = '';
+      textSearchField.dispatchEvent(new Event('blur'));
+    });
   }
 
   if (DropdownSelectFields) {
@@ -117,7 +119,7 @@ function renderClearButtonsByFormFilters() {
     ClearAllFiltersButtons,
     DynamicClearFilterButtonsContainer,
     FilterForm,
-    TextSearchField,
+    TextSearchFields,
   } = formConfig;
 
   if (!FilterForm || !DynamicClearFilterButtonsContainer) return;
@@ -128,7 +130,11 @@ function renderClearButtonsByFormFilters() {
   // Remove "all_options"
   existingFilters.shift();
 
-  if (TextSearchField) existingFilters.push(TextSearchField);
+  if (TextSearchFields) {
+    TextSearchFields.forEach((textSearchField) => {
+      existingFilters.push(textSearchField);
+    });
+  }
 
   // If there are any filters set, show the clear buttons
   if (existingFilters.length) {

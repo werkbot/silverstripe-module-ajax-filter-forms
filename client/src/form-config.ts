@@ -74,9 +74,9 @@ export interface FormConfig {
   StartHiddenField?: HTMLInputElement;
 
   /**
-   * A text input field that allows users to search the results by a text string.
+   * A list of text input fields that allows users to search the results by a text string.
    */
-  TextSearchField?: HTMLInputElement;
+  TextSearchFields?: NodeListOf<HTMLInputElement>;
 
   /**
    * A "View Type" element, that when clicked toggles the view type of the results (e.g. grid or list).
