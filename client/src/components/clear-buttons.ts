@@ -9,11 +9,34 @@ interface Filter {
 
 let formConfig: FormConfig = {};
 
+export function updateClearAllFiltersButtonVisibility(config: FormConfig) {
+  const {
+    ClearAllFiltersButtons,
+    FilterForm,
+  } = config;
+
+  if (!FilterForm) return;
+
+  const formData = new FormData(FilterForm);
+  const hasFilters = Array.from(formData.entries()).some(([key, value]) => {
+    if (key == 'SecurityID') return;
+
+    // Confirm the value is not the first option in the select dropdown
+    const selectElement = FilterForm.querySelector<HTMLSelectElement>(`select[name="${key}"]`);
+    if (selectElement && selectElement.selectedIndex == 0) return;
+
+    return value;
+  });
+
+  if (ClearAllFiltersButtons) ClearAllFiltersButtons.forEach((clearButton) => {
+    clearButton.style.display = hasFilters ? 'flex' : 'none';
+  });
+}
+
 function clearButtonEventListener(event: Event) {
   event.preventDefault();
 
   const {
-    ClearAllFiltersButtons,
     FilterForm,
   } = formConfig;
 
@@ -38,15 +61,7 @@ function clearButtonEventListener(event: Event) {
       }
     });
 
-    const checkedFilters = Array.from(
-      FilterForm.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
-    ).filter(input => input.checked);
-
-    if (checkedFilters.length == 0) {
-      if (ClearAllFiltersButtons) ClearAllFiltersButtons.forEach((clearButton) => {
-        clearButton.style.display = 'none';
-      });
-    }
+    updateClearAllFiltersButtonVisibility(formConfig);
 
     // Submiting the form will re-render the filter clear buttons
     submitForm(formConfig);
@@ -216,4 +231,6 @@ export function initializeFilterClearButtons(config: FormConfig) {
   if (AllOptionsCheckbox) {
     AllOptionsCheckbox.parentElement?.addEventListener('click', clearAllButtonEventListener);
   }
+
+  updateClearAllFiltersButtonVisibility(formConfig);
 }

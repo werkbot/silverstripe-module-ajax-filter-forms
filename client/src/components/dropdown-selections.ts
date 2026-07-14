@@ -1,20 +1,18 @@
 import { submitForm } from './submit-form';
 import { FormConfig } from '../form-config';
+import { updateClearAllFiltersButtonVisibility } from './clear-buttons';
 
 export function initializeDropdownSelections(config: FormConfig) {
   const {
     DropdownSelectFields,
-    ClearAllFiltersButtons,
   } = config;
 
   if (!DropdownSelectFields) return;
 
   DropdownSelectFields.forEach((dropdown) => {
     dropdown.addEventListener('change', () => {
+      updateClearAllFiltersButtonVisibility(config);
       submitForm(config)
-      if (dropdown.value && ClearAllFiltersButtons) ClearAllFiltersButtons.forEach((clearButton) => {
-        clearButton.style.display = 'flex';
-      });
     });
   });
 }
