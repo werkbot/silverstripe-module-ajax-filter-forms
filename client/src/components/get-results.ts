@@ -10,6 +10,8 @@ export interface ResponseData {
   FilterString?: string;
 }
 
+let existingRequests = 0;
+
 /**
  * Get results from url
  *   - Creates a promise to fetch the url
@@ -44,9 +46,16 @@ export async function getResults<T extends ResponseData>(
 
   updateCanTrigger(false);
 
+  existingRequests++;
+
   return fetch(url.toString(), { headers: { 'x-requested-with': 'XMLHttpRequest' } })
     .then(response => response.json())
     .then((data: ResponseData) => {
+      existingRequests--
+
+      // Only display the results of the latest request, if multiple requests are made in quick succession
+      if (existingRequests) return data;
+
       if (ResultsContainer && data.ResultsHTML) {
         ResultsContainer.innerHTML = data.ResultsHTML
       }
