@@ -50,14 +50,20 @@ function clearButtonEventListener(event: Event) {
       key: button.dataset.key || '',
     };
 
-    // Uncheck the filter
-    const clearButtons = FilterForm.querySelectorAll<HTMLInputElement>(`input[name="${filter.key}"]`);
+    // Uncheck/clear the filter
+    const clearButtons = FilterForm.querySelectorAll<HTMLInputElement>(`input[name="${filter.key}"], select[name="${filter.key}"]`);
     clearButtons.forEach((input) => {
-      if (input.type == 'text') {
-        input.value = '';
-        input.dispatchEvent(new Event('blur'));
-      } else if (input.type == 'checkbox') {
-        input.checked = false;
+      switch (input.type) {
+        case 'text':
+          input.value = '';
+          input.dispatchEvent(new Event('blur'));
+        break;
+        case 'select-one':
+          input.selectedIndex = 0;
+        break;
+        case 'checkbox':
+          input.checked = false;
+        break;
       }
     });
 
@@ -73,7 +79,6 @@ function clearButtonEventListener(event: Event) {
 }
 
 function clearAllButtonEventListener() {
-
   const {
     AllOptionsCheckbox,
     CheckboxContainers,
@@ -135,6 +140,7 @@ function renderClearButtonsByFormFilters() {
     DynamicClearFilterButtonsContainer,
     FilterForm,
     TextSearchFields,
+    DropdownSelectFields,
   } = formConfig;
 
   if (!FilterForm || !DynamicClearFilterButtonsContainer) return;
@@ -151,6 +157,12 @@ function renderClearButtonsByFormFilters() {
     });
   }
 
+  if (DropdownSelectFields) {
+    DropdownSelectFields.forEach((dropdown) => {
+      existingFilters.push(dropdown);
+    });
+  }
+
   // If there are any filters set, show the clear buttons
   if (existingFilters.length) {
     existingFilters.forEach((filter) => {
@@ -159,15 +171,23 @@ function renderClearButtonsByFormFilters() {
       let filterSet = false;
       let clearButtonText = '';
 
-      if (filter.type == 'text') {
-        filterSet = filter.value != '';
-        clearButtonText = filter.value;
+      switch (filter.type) {
+        case 'text':
+          filterSet = filter.value != '';
+          clearButtonText = filter.value;
+        break;
 
-      } else if (filter.type == 'checkbox') {
-        filterSet = filter.checked;
-        if (filter.labels) {
-          clearButtonText = filter.labels[0].innerText;
-        }
+        case 'select-one':
+          filterSet = filter.value != '';
+          clearButtonText = filter.options[filter.selectedIndex].innerText;
+        break;
+
+        case 'checkbox':
+          filterSet = filter.checked;
+          if (filter.labels) {
+            clearButtonText = filter.labels[0].innerText;
+          }
+        break;
       }
 
       if (filterSet) {

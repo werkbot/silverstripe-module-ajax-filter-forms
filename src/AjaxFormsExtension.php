@@ -48,45 +48,65 @@ class AjaxFormsExtension extends DataExtension
   {
     $request = $this->owner->request;
 
-    $filtersMessage = '<p>Now Displaying: <strong>';
+    $filterString = '<p>Now Displaying: <strong>';
     $filtersForTemplate = [];
 
-    $search = $request->getVar($this->owner->getTextSearchName());
-    if ($search) {
-      $filtersForTemplate[] = [
-        'Key' => 'Search',
-        'Value' => $search,
-        'Title' => $search,
-      ];
-      $filtersMessage .= $search . ', ';
-    }
+    foreach ($this->owner->getFiltersConfig() as $fieldName => $type) {
+      $value = $request->getVar($fieldName);
+      if (!$value) continue;
 
-    foreach ($this->owner->getFiltersConfig() as $optionsFieldName => $className) {
-      $optionIDs = $request->getVar($optionsFieldName);
-      if ($optionIDs) {
-        foreach ($optionIDs as $optionID) {
-          $option = $className::get()->byID($optionID);
+      if ($type == 'TextValue') {
+        $filtersForTemplate[] = [
+          'Key' => $fieldName,
+          'Value' => $value,
+          'Title' => $value,
+        ];
+        $filterString .= $value . ', ';
+
+      } else if ($type == 'SelectedValue') {
+        $title = $this->owner->getAjaxFilterFormFields()->fieldByName($fieldName)->getSource()[$value];
+        $filtersForTemplate[] = [
+          'Key' => $fieldName,
+          'Value' => $value,
+          'Title' => $title,
+        ];
+        $filterString .= $title . ', ';
+
+      // CheckboxSet of DataObject IDs
+      } else if (is_array($value)) {
+        foreach ($value as $optionID) {
+          $option = $type::get()->byID($optionID);
           if (!$option) continue;
           $filtersForTemplate[] = [
-            'Key' => $optionsFieldName . '[' . $optionID . ']',
+            'Key' => $fieldName . '[' . $optionID . ']',
             'Value' => $optionID,
             'Title' => $option->Title,
           ];
-          $filtersMessage .= $option->Title . ', ';
+          $filterString .= $option->Title . ', ';
         }
+
+      } else {
+        $option = $type::get()->byID($value);
+        if (!$option) continue;
+        $filtersForTemplate[] = [
+          'Key' => $fieldName,
+          'Value' => $value,
+          'Title' => $option->Title,
+        ];
+        $filterString .= $option->Title . ', ';
       }
     }
 
-    if ($search || $filtersForTemplate) {
-      $filtersMessage = rtrim($filtersMessage, ', ') . '</strong></p>';
+    if ($filtersForTemplate) {
+      $filterString = rtrim($filterString, ', ') . '</strong></p>';
     } else {
-      $filtersMessage .= 'All</strong></p>';
+      $filterString .= 'All</strong></p>';
     }
 
     $filtersForTemplate = ArrayList::create($filtersForTemplate);
 
     $activeFilters = [
-      'FiltersMessage' => $filtersMessage,
+      'FilterString' => $filterString,
       'FiltersForTemplate' => $filtersForTemplate,
     ];
 
@@ -102,8 +122,6 @@ class AjaxFormsExtension extends DataExtension
     $loadMoreCount = $this->owner->getLoadMoreCount();
 
     $newStart = $start + $loadMoreCount;
-
-    $filtersMessage = $this->owner->getActiveFilters()['FiltersMessage'];
 
     $results = ArrayList::create(
       array_slice(
@@ -128,8 +146,8 @@ class AjaxFormsExtension extends DataExtension
 
     $resultsData = array_merge(
       $resultsHTMLData,
+      $this->owner->getActiveFilters(),
       [
-        'FilterString' => $filtersMessage,
         'Start' => $newStart,
         'CanLoadMore' => $canLoadMore,
         'ResultsHTML' => ArrayData::create($resultsHTMLData)->renderWith($this->owner->getResultsTemplate())->RAW(),
