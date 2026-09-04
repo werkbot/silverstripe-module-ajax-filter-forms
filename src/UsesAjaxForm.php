@@ -7,34 +7,6 @@ use SilverStripe\Forms\FieldList;
 interface UsesAjaxForm
 {
   /**
-   * For DataObject ID fields:
-   * Map a field name to a has_many/many_many DataObject source.
-   * Format like:
-   *   [ 'FormFieldName' => FieldSourceClassName::class ]
-   *
-   * For text value fields:
-   * Map the field name to 'TextValue'
-   * Format like:
-   *   [ 'FormFieldName' => 'TextValue' ]
-   *
-   * For selected value fields:
-   * Map the field name to 'SelectedValue'
-   * Format like:
-   *   [ 'FormFieldName' => 'SelectedValue' ]
-   *
-   * Example:
-   *   [
-   *     'Categories' => Category::class,
-   *     'Tags' => Tag::class,
-   *     'Title' => 'TextValue',
-   *     'Price' => 'SelectedValue',
-   *   ]
-   *
-   * @return array<string, class-string<\SilverStripe\ORM\DataObject>>
-   */
-  public function getFiltersConfig(): array;
-
-  /**
    * The endpoint to which the form will submit via AJAX.
    * @return string
    */

@@ -4,6 +4,7 @@ namespace Werkbot\AjaxForms;
 
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Forms\Form;
+use SilverStripe\Forms\SelectField;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\View\ArrayData;
@@ -48,52 +49,38 @@ class AjaxFormsExtension extends DataExtension
   {
     $request = $this->owner->request;
 
+    $fields = $this->owner->getAjaxFilterFormFields();
+
     $filterString = '<p>Now Displaying: <strong>';
     $filtersForTemplate = [];
 
-    foreach ($this->owner->getFiltersConfig() as $fieldName => $type) {
+    foreach ($fields as $field) {
+      $fieldName = $field->getName();
       $value = $request->getVar($fieldName);
+
       if (!$value) continue;
 
-      if ($type == 'TextValue') {
+      if ($field instanceof SelectField) {
+        $source = $field->getSource();
+        $values = is_array($value) ? $value : [$value];
+        foreach ($values as $optionID) {
+          if (empty($source[$optionID])) continue;
+          $title = $source[$optionID];
+          $filtersForTemplate[] = [
+            'Key' => is_array($value) ? $fieldName . '[' . $optionID . ']' : $fieldName,
+            'Value' => $optionID,
+            'Title' => $title,
+          ];
+          $filterString .= $title . ', ';
+        }
+
+      } else {
         $filtersForTemplate[] = [
           'Key' => $fieldName,
           'Value' => $value,
           'Title' => $value,
         ];
         $filterString .= $value . ', ';
-
-      } else if ($type == 'SelectedValue') {
-        $title = $this->owner->getAjaxFilterFormFields()->fieldByName($fieldName)->getSource()[$value];
-        $filtersForTemplate[] = [
-          'Key' => $fieldName,
-          'Value' => $value,
-          'Title' => $title,
-        ];
-        $filterString .= $title . ', ';
-
-      // CheckboxSet of DataObject IDs
-      } else if (is_array($value)) {
-        foreach ($value as $optionID) {
-          $option = $type::get()->byID($optionID);
-          if (!$option) continue;
-          $filtersForTemplate[] = [
-            'Key' => $fieldName . '[' . $optionID . ']',
-            'Value' => $optionID,
-            'Title' => $option->Title,
-          ];
-          $filterString .= $option->Title . ', ';
-        }
-
-      } else {
-        $option = $type::get()->byID($value);
-        if (!$option) continue;
-        $filtersForTemplate[] = [
-          'Key' => $fieldName,
-          'Value' => $value,
-          'Title' => $option->Title,
-        ];
-        $filterString .= $option->Title . ', ';
       }
     }
 
