@@ -9,11 +9,34 @@ interface Filter {
 
 let formConfig: FormConfig = {};
 
+export function updateClearAllFiltersButtonVisibility(config: FormConfig) {
+  const {
+    ClearAllFiltersButtons,
+    FilterForm,
+  } = config;
+
+  if (!FilterForm) return;
+
+  const formData = new FormData(FilterForm);
+  const hasFilters = Array.from(formData.entries()).some(([key, value]) => {
+    if (key == 'SecurityID') return;
+
+    // Confirm the value is not the first option in the select dropdown
+    const selectElement = FilterForm.querySelector<HTMLSelectElement>(`select[name="${key}"]`);
+    if (selectElement && selectElement.selectedIndex == 0) return;
+
+    return value;
+  });
+
+  if (ClearAllFiltersButtons) ClearAllFiltersButtons.forEach((clearButton) => {
+    clearButton.style.display = hasFilters ? 'flex' : 'none';
+  });
+}
+
 function clearButtonEventListener(event: Event) {
   event.preventDefault();
 
   const {
-    ClearAllFiltersButtons,
     FilterForm,
   } = formConfig;
 
@@ -27,26 +50,24 @@ function clearButtonEventListener(event: Event) {
       key: button.dataset.key || '',
     };
 
-    // Uncheck the filter
-    const clearButtons = FilterForm.querySelectorAll<HTMLInputElement>(`input[name="${filter.key}"]`);
+    // Uncheck/clear the filter
+    const clearButtons = FilterForm.querySelectorAll<HTMLInputElement>(`input[name="${filter.key}"], select[name="${filter.key}"]`);
     clearButtons.forEach((input) => {
-      if (input.type == 'text') {
-        input.value = '';
-        input.dispatchEvent(new Event('blur'));
-      } else if (input.type == 'checkbox') {
-        input.checked = false;
+      switch (input.type) {
+        case 'text':
+          input.value = '';
+          input.dispatchEvent(new Event('blur'));
+        break;
+        case 'select-one':
+          input.selectedIndex = 0;
+        break;
+        case 'checkbox':
+          input.checked = false;
+        break;
       }
     });
 
-    const checkedFilters = Array.from(
-      FilterForm.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
-    ).filter(input => input.checked);
-
-    if (checkedFilters.length == 0) {
-      if (ClearAllFiltersButtons) ClearAllFiltersButtons.forEach((clearButton) => {
-        clearButton.style.display = 'none';
-      });
-    }
+    updateClearAllFiltersButtonVisibility(formConfig);
 
     // Submiting the form will re-render the filter clear buttons
     submitForm(formConfig);
@@ -58,14 +79,14 @@ function clearButtonEventListener(event: Event) {
 }
 
 function clearAllButtonEventListener() {
-
   const {
     AllOptionsCheckbox,
     CheckboxContainers,
     ClearAllFiltersButtons,
     FilterDropdownToggleButtons,
     FilterForm,
-    TextSearchField,
+    TextSearchFields,
+    DropdownSelectFields,
   } = formConfig;
 
   if (CheckboxContainers) CheckboxContainers.forEach((checkboxContainer) => {
@@ -84,9 +105,17 @@ function clearAllButtonEventListener() {
     clearButton.style.display = 'none';
   });
 
-  if (TextSearchField) {
-    TextSearchField.value = '';
-    TextSearchField.dispatchEvent(new Event('blur'));
+  if (TextSearchFields) {
+    TextSearchFields.forEach((textSearchField) => {
+      textSearchField.value = '';
+      textSearchField.dispatchEvent(new Event('blur'));
+    });
+  }
+
+  if (DropdownSelectFields) {
+    DropdownSelectFields.forEach((dropdown) => {
+      dropdown.selectedIndex = 0;
+    });
   }
 
   if (FilterDropdownToggleButtons && FilterDropdownToggleButtons.length && FilterForm) {
@@ -110,10 +139,11 @@ function renderClearButtonsByFormFilters() {
     ClearAllFiltersButtons,
     DynamicClearFilterButtonsContainer,
     FilterForm,
-    TextSearchField,
+    TextSearchFields,
+    DropdownSelectFields,
   } = formConfig;
 
-  if (!FilterForm) return;
+  if (!FilterForm || !DynamicClearFilterButtonsContainer) return;
 
   // Get all filters set in the form
   const existingFilters = Array.from(FilterForm.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
@@ -121,7 +151,17 @@ function renderClearButtonsByFormFilters() {
   // Remove "all_options"
   existingFilters.shift();
 
-  if (TextSearchField) existingFilters.push(TextSearchField);
+  if (TextSearchFields) {
+    TextSearchFields.forEach((textSearchField) => {
+      existingFilters.push(textSearchField);
+    });
+  }
+
+  if (DropdownSelectFields) {
+    DropdownSelectFields.forEach((dropdown) => {
+      existingFilters.push(dropdown);
+    });
+  }
 
   // If there are any filters set, show the clear buttons
   if (existingFilters.length) {
@@ -131,15 +171,23 @@ function renderClearButtonsByFormFilters() {
       let filterSet = false;
       let clearButtonText = '';
 
-      if (filter.type == 'text') {
-        filterSet = filter.value != '';
-        clearButtonText = filter.value;
+      switch (filter.type) {
+        case 'text':
+          filterSet = filter.value != '';
+          clearButtonText = filter.value;
+        break;
 
-      } else if (filter.type == 'checkbox') {
-        filterSet = filter.checked;
-        if (filter.labels) {
-          clearButtonText = filter.labels[0].innerText;
-        }
+        case 'select-one':
+          filterSet = filter.value != '';
+          clearButtonText = filter.options[filter.selectedIndex].innerText;
+        break;
+
+        case 'checkbox':
+          filterSet = filter.checked;
+          if (filter.labels) {
+            clearButtonText = filter.labels[0].innerText;
+          }
+        break;
       }
 
       if (filterSet) {
@@ -203,4 +251,6 @@ export function initializeFilterClearButtons(config: FormConfig) {
   if (AllOptionsCheckbox) {
     AllOptionsCheckbox.parentElement?.addEventListener('click', clearAllButtonEventListener);
   }
+
+  updateClearAllFiltersButtonVisibility(formConfig);
 }

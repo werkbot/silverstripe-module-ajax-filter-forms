@@ -4,6 +4,7 @@ namespace Werkbot\AjaxForms;
 
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Forms\Form;
+use SilverStripe\Forms\SelectField;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\View\ArrayData;
@@ -48,45 +49,51 @@ class AjaxFormsExtension extends DataExtension
   {
     $request = $this->owner->request;
 
-    $filtersMessage = '<p>Now Displaying: <strong>';
+    $fields = $this->owner->getAjaxFilterFormFields();
+
+    $filterString = '<p>Now Displaying: <strong>';
     $filtersForTemplate = [];
 
-    $search = $request->getVar($this->owner->getTextSearchName());
-    if ($search) {
-      $filtersForTemplate[] = [
-        'Key' => 'Search',
-        'Value' => $search,
-        'Title' => $search,
-      ];
-      $filtersMessage .= $search . ', ';
-    }
+    foreach ($fields as $field) {
+      $fieldName = $field->getName();
+      $value = $request->getVar($fieldName);
 
-    foreach ($this->owner->getFiltersConfig() as $optionsFieldName => $className) {
-      $optionIDs = $request->getVar($optionsFieldName);
-      if ($optionIDs) {
-        foreach ($optionIDs as $optionID) {
-          $option = $className::get()->byID($optionID);
-          if (!$option) continue;
+      if (!$value) continue;
+
+      if ($field instanceof SelectField) {
+        $source = $field->getSource();
+        $values = is_array($value) ? $value : [$value];
+        foreach ($values as $optionID) {
+          if (empty($source[$optionID])) continue;
+          $title = $source[$optionID];
           $filtersForTemplate[] = [
-            'Key' => $optionsFieldName . '[' . $optionID . ']',
+            'Key' => is_array($value) ? $fieldName . '[' . $optionID . ']' : $fieldName,
             'Value' => $optionID,
-            'Title' => $option->Title,
+            'Title' => $title,
           ];
-          $filtersMessage .= $option->Title . ', ';
+          $filterString .= $title . ', ';
         }
+
+      } else {
+        $filtersForTemplate[] = [
+          'Key' => $fieldName,
+          'Value' => $value,
+          'Title' => $value,
+        ];
+        $filterString .= $value . ', ';
       }
     }
 
-    if ($search || $filtersForTemplate) {
-      $filtersMessage = rtrim($filtersMessage, ', ') . '</strong></p>';
+    if ($filtersForTemplate) {
+      $filterString = rtrim($filterString, ', ') . '</strong></p>';
     } else {
-      $filtersMessage .= 'All</strong></p>';
+      $filterString .= 'All</strong></p>';
     }
 
     $filtersForTemplate = ArrayList::create($filtersForTemplate);
 
     $activeFilters = [
-      'FiltersMessage' => $filtersMessage,
+      'FilterString' => $filterString,
       'FiltersForTemplate' => $filtersForTemplate,
     ];
 
@@ -95,15 +102,13 @@ class AjaxFormsExtension extends DataExtension
     return $activeFilters;
   }
 
-  public function getAjaxResponse(): HTTPResponse
+  public function getAjaxResultsData(): array
   {
     $request = $this->owner->request;
     $start = $this->owner->request->getVar('Start');
     $loadMoreCount = $this->owner->getLoadMoreCount();
 
     $newStart = $start + $loadMoreCount;
-
-    $filtersMessage = $this->owner->getActiveFilters()['FiltersMessage'];
 
     $results = ArrayList::create(
       array_slice(
@@ -119,18 +124,31 @@ class AjaxFormsExtension extends DataExtension
       $canLoadMore = $results->count() % $loadMoreCount === 0;
     }
 
-    $responseData = [
-      'FilterString' => $filtersMessage,
-      'Start' => $newStart,
-      'CanLoadMore' => $canLoadMore,
-      'ResultsHTML' => ArrayData::create([
-        'AjaxSearchResults' => $results,
-      ])->renderWith($this->owner->getResultsTemplate())->RAW(),
+    $resultsHTMLData = [
+      'AjaxSearchResults' => $results,
+      'AjaxSearchResultsEncoded' => json_encode($results->toNestedArray()),
     ];
 
-    $this->owner->extend('updateAjaxResponseData', $responseData);
+    $this->owner->extend('updateAjaxResultsHTMLData', $resultsHTMLData);
 
-    $response = HTTPResponse::create(json_encode($responseData))
+    $resultsData = array_merge(
+      $resultsHTMLData,
+      $this->owner->getActiveFilters(),
+      [
+        'Start' => $newStart,
+        'CanLoadMore' => $canLoadMore,
+        'ResultsHTML' => ArrayData::create($resultsHTMLData)->renderWith($this->owner->getResultsTemplate())->RAW(),
+      ]
+    );
+
+    $this->owner->extend('updateAjaxResultsData', $resultsData);
+
+    return $resultsData;
+  }
+
+  public function getAjaxResponse(): HTTPResponse
+  {
+    $response = HTTPResponse::create(json_encode($this->owner->getAjaxResultsData()))
       ->addHeader('Content-Type', 'application/json');
 
     $this->owner->extend('updateAjaxResponse', $response);
