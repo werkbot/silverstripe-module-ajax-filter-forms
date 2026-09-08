@@ -7,19 +7,6 @@ use SilverStripe\Forms\FieldList;
 interface UsesAjaxForm
 {
   /**
-   * For CheckboxSetFields.
-   * For the searchable DataObject, map a field name to a has_many/many_many DataObject source.
-   * Format like:
-   *   [ 'FormFieldName' => FieldSourceClassName::class ]
-   *
-   * Example:
-   *   [ 'Categories' => Category::class ]
-   *
-   * @return array<string, class-string<\SilverStripe\ORM\DataObject>>
-   */
-  public function getFiltersConfig(): array;
-
-  /**
    * The endpoint to which the form will submit via AJAX.
    * @return string
    */
@@ -60,10 +47,4 @@ interface UsesAjaxForm
    * @return string
    */
   public function getResultsTemplate(): string;
-
-  /**
-   * Return the name of the text search field, if applicable.
-   * @return string
-   */
-  public function getTextSearchName(): string;
 }
