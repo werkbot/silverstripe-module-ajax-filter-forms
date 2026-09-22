@@ -69,7 +69,7 @@ export async function getResults<T extends ResponseData>(
 
       window.history.pushState({}, '', urlString);
 
-      updateCanLoadMore(true);
+      updateCanLoadMore(data.CanLoadMore, config);
       updateCanTrigger(true);
 
       ResultsContainer.dispatchEvent(new CustomEvent('ajax-results', { detail: data }));
