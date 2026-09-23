@@ -146,10 +146,7 @@ function renderClearButtonsByFormFilters() {
   if (!FilterForm || !DynamicClearFilterButtonsContainer) return;
 
   // Get all filters set in the form
-  const existingFilters = Array.from(FilterForm.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
-
-  // Remove "all_options"
-  existingFilters.shift();
+  const existingFilters = Array.from(FilterForm.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:not([value="all_options"])'));
 
   if (TextSearchFields) {
     TextSearchFields.forEach((textSearchField) => {

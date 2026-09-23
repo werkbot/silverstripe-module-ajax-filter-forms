@@ -31,7 +31,7 @@ Page template
           <% end_loop %>
         <% end_if %>
       </div>
-      <button class="button option-clear-filter clear-all-types-btn"<% if $FiltersForTemplate.count == 0 %>style="display: none;"<% end_if %>>Clear Filters &nbsp; <i class="fa fa-times"></i></button>
+      <button class="button option-clear-filter clear-all-btn"<% if $FiltersForTemplate.count == 0 %>style="display: none;"<% end_if %>>Clear Filters &nbsp; <i class="fa fa-times"></i></button>
     </div>
   </section>
 
@@ -42,6 +42,10 @@ Page template
   >
     <% include AjaxFilterFormResults %>
   </section>
+
+  <div class="fw-container flex-container flex-horizontal-center fw-space">
+    <button class="button white-btn ajax-filter-form-load-more-button" <% if not $CanLoadMore %>style="display: none;"<% end_if %>>Load More</button>
+  </div>
 </div>
 ```
 Includes/AjaxFilterFormResults

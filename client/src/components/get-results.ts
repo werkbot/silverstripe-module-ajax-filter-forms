@@ -65,11 +65,11 @@ export async function getResults<T extends ResponseData>(
       }
 
       // May be using a unique endpoint for ajax, usually added by a DataExtension
-      const urlString = url.toString().replace('ajax', '');
+      const urlString = window.location.origin + window.location.pathname + url.search;
 
       window.history.pushState({}, '', urlString);
 
-      updateCanLoadMore(true);
+      updateCanLoadMore(data.CanLoadMore, config);
       updateCanTrigger(true);
 
       ResultsContainer.dispatchEvent(new CustomEvent('ajax-results', { detail: data }));
