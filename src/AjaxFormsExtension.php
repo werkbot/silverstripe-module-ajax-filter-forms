@@ -16,6 +16,7 @@ class AjaxFormsExtension extends DataExtension
   ];
 
   private static $url_handlers = [
+    // DEPRECATED - This is not necessary, unless this endpoint is built into the JS.
     'loadMoreResults/$Start' => 'getAjaxResponse',
   ];
 
