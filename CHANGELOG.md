@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.1 - 2026-09-29
+## 🎉 New Features
+- support load more buttons
+
+## 🐛 Bugfixes
+- remove all options by name
+- use any endpoint for ajax
+
+
+
 ## 1.0.1 - 2026-09-23
 ## 🎉 New Features
 - support load more buttons
