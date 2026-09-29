@@ -40,9 +40,7 @@ export function initializeLoadMore(config: FormConfig) {
     ResultsContainer.innerHTML += `<img src="${LoaderSource}" alt="loader gif" class="loader-gif"/>`
 
     const originalSearch = document.location.search;
-    var urlString = FilterForm.action;
-    urlString = urlString.replace(/\/$/, '');
-    const url = new URL(urlString + '/loadMoreResults');
+    const url = new URL(FilterForm.action);
     url.search = originalSearch;
     const start = StartHiddenField.value != '0' ? StartHiddenField.value : LoadMoreCount;
     url.searchParams.set('Start', String(start));
@@ -55,6 +53,7 @@ export function initializeLoadMore(config: FormConfig) {
         StartHiddenField.value = data.Start;
         updateCanLoadMore(data.CanLoadMore, config);
         updateCanTrigger(true);
+        ResultsContainer.dispatchEvent(new CustomEvent('ajax-results', { detail: data }));
       });
   }
 }
