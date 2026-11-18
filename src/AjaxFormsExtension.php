@@ -128,6 +128,7 @@ class AjaxFormsExtension extends DataExtension
     $resultsHTMLData = [
       'AjaxSearchResults' => $results,
       'AjaxSearchResultsEncoded' => json_encode($results->toNestedArray()),
+      'IsLoadingMore' => $start != 0,
     ];
 
     $this->owner->extend('updateAjaxResultsHTMLData', $resultsHTMLData);
