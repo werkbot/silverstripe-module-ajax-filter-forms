@@ -55,6 +55,10 @@ Includes/AjaxFilterFormResults
     <% loop $AjaxSearchResults %>
       <% include ResultItemSummary %>
     <% end_loop %>
+  <% else_if $IsLoadingMore %>
+    <p>No more results</p>
+  <% else %>
+    <p>No results</p>
   <% end_if %>
 </div>
 ```
