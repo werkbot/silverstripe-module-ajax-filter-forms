@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3 - 2026-11-18
+## 🔨 Improvements
+- is loading more variable for dynamic no results message
+
+
+
 ## 1.0.1 - 2026-09-29
 ## 🎉 New Features
 - support load more buttons
